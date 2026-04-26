@@ -6,24 +6,23 @@
   <title>Med Plus</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- KEEP YOUR ORIGINAL CSS -->
+
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- HEADER -->
-
-<header style="padding:20px; display:flex; justify-content:space-between;">
+<header>
   <h2>Med Plus</h2>
 </header>
 
-<!-- HERO -->
+<section class="hero">
 
-<section style="padding:50px;">
   <h1>Find Medicines From Nearby Stores</h1>
-  <p>Search medicines and order instantly</p>
+  <p>Search pharmacies near your location, browse their products, and get medicines delivered.</p>
 
-  <!-- EXISTING PINCODE -->
+  <!-- EXISTING PINCODE (KEEP AS IS) -->
 
   <input type="text" placeholder="Enter your pincode">
   <button>Find Stores</button>
@@ -31,52 +30,70 @@
   <!-- 🔥 NEW MEDICINE SEARCH -->
 
   <div style="margin-top:20px;">
-    <input type="text" id="searchInput" placeholder="Search medicine (e.g. dolo)" style="padding:10px;width:60%;">
-    <button onclick="searchMedicine()">Search Medicine</button>
+    <input 
+      type="text" 
+      id="searchInput" 
+      placeholder="Search medicine like dolo"
+      style="padding:12px; width:300px; border-radius:8px;"
+    >
+
+```
+<button onclick="searchMedicine()">
+  Search Medicine
+</button>
+```
+
   </div>
 
   <!-- RESULTS -->
 
-  <div id="medicineResults" style="margin-top:20px;"></div>
+  <div id="medicineResults" style="margin-top:30px;"></div>
+
 </section>
 
 <script>
 const BASE_URL = "https://medinear-backend-w69d.onrender.com";
 
-// 🔍 SEARCH MEDICINE
+// 🔍 SEARCH
 async function searchMedicine() {
   const input = document.getElementById("searchInput").value;
 
   if (!input) {
-    alert("Please enter medicine name");
+    alert("Enter medicine name");
     return;
   }
 
-  const res = await fetch(`${BASE_URL}/medicines/search?name=${input}`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`${BASE_URL}/medicines/search?name=${input}`);
+    const data = await res.json();
 
-  const resultDiv = document.getElementById("medicineResults");
-  resultDiv.innerHTML = "";
+    const resultDiv = document.getElementById("medicineResults");
+    resultDiv.innerHTML = "";
 
-  if (data.length === 0) {
-    resultDiv.innerHTML = "<p>No medicines found</p>";
-    return;
+    if (data.length === 0) {
+      resultDiv.innerHTML = "<p>No medicines found</p>";
+      return;
+    }
+
+    data.forEach(item => {
+      resultDiv.innerHTML += `
+        <div style="border:1px solid #ddd; padding:15px; margin:10px; border-radius:10px;">
+          <h3>${item.name}</h3>
+          <p>Price: ₹${item.price}</p>
+          <button onclick="orderMedicine('${item.name}', '${item.store_id}')">
+            Order Now
+          </button>
+        </div>
+      `;
+    });
+
+  } catch (error) {
+    console.error(error);
+    alert("Error fetching medicines");
   }
-
-  data.forEach(item => {
-    resultDiv.innerHTML += `
-      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-        <h3>${item.name}</h3>
-        <p>Price: ₹${item.price}</p>
-        <button onclick="orderMedicine('${item.name}', '${item.store_id}')">
-          Order Now
-        </button>
-      </div>
-    `;
-  });
 }
 
-// 🛒 PLACE ORDER
+// 🛒 ORDER
 async function orderMedicine(name, store_id) {
   await fetch(`${BASE_URL}/orders/`, {
     method: "POST",
