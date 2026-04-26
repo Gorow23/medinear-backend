@@ -2,50 +2,57 @@
 
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MediNear — Find Pharmacies Near You</title>
+  <meta charset="UTF-8">
+  <title>Med Plus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<!-- HEADER -->
+
+<header style="padding:20px; display:flex; justify-content:space-between;">
+  <h2>Med Plus</h2>
+</header>
+
 <!-- HERO -->
 
-<section class="hero">
-  <div class="hero-text">
-    <h1>Find Medicines from Nearby Stores</h1>
+<section style="padding:50px;">
+  <h1>Find Medicines From Nearby Stores</h1>
+  <p>Search medicines and order instantly</p>
 
-```
-<!-- LOCATION -->
-<input type="text" id="pincodeInput" placeholder="Enter pincode">
+  <!-- EXISTING PINCODE -->
 
-<!-- 🔥 NEW MEDICINE SEARCH -->
-<div style="margin-top:20px;">
-  <input type="text" id="searchInput" placeholder="Search medicine (e.g. dolo)" style="padding:10px;width:60%;">
-  <button onclick="searchMedicine()">Search Medicine</button>
-</div>
+  <input type="text" placeholder="Enter your pincode">
+  <button>Find Stores</button>
 
-<!-- RESULTS -->
-<div id="medicineResults" style="margin-top:20px;"></div>
-```
+  <!-- 🔥 NEW MEDICINE SEARCH -->
 
+  <div style="margin-top:20px;">
+    <input type="text" id="searchInput" placeholder="Search medicine (e.g. dolo)" style="padding:10px;width:60%;">
+    <button onclick="searchMedicine()">Search Medicine</button>
   </div>
+
+  <!-- RESULTS -->
+
+  <div id="medicineResults" style="margin-top:20px;"></div>
 </section>
 
 <script>
+const BASE_URL = "https://medinear-backend-w69d.onrender.com";
+
+// 🔍 SEARCH MEDICINE
 async function searchMedicine() {
   const input = document.getElementById("searchInput").value;
 
   if (!input) {
-    alert("Enter medicine name");
+    alert("Please enter medicine name");
     return;
   }
 
-  const res = await fetch(`http://127.0.0.1:8000/medicines/search?name=${input}`);
+  const res = await fetch(`${BASE_URL}/medicines/search?name=${input}`);
   const data = await res.json();
 
   const resultDiv = document.getElementById("medicineResults");
@@ -69,8 +76,9 @@ async function searchMedicine() {
   });
 }
 
+// 🛒 PLACE ORDER
 async function orderMedicine(name, store_id) {
-  await fetch("http://127.0.0.1:8000/orders/", {
+  await fetch(`${BASE_URL}/orders/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -82,7 +90,7 @@ async function orderMedicine(name, store_id) {
     })
   });
 
-  alert("Order placed!");
+  alert("Order placed successfully!");
 }
 </script>
 
