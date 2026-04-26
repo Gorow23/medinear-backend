@@ -6,8 +6,6 @@
   <title>Med Plus</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- KEEP YOUR ORIGINAL CSS -->
-
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -22,32 +20,27 @@
   <h1>Find Medicines From Nearby Stores</h1>
   <p>Search pharmacies near your location, browse their products, and get medicines delivered.</p>
 
-  <!-- EXISTING PINCODE (KEEP AS IS) -->
+  <!-- EXISTING PINCODE -->
 
-  <input type="text" placeholder="Enter your pincode">
-  <button>Find Stores</button>
+  <div class="search-box">
+    <input type="text" placeholder="Enter your pincode">
+    <button>Find Stores</button>
+  </div>
 
-  <!-- 🔥 NEW MEDICINE SEARCH -->
+  <!-- 🔥 MEDICINE SEARCH (MATCHING DESIGN) -->
 
-  <div style="margin-top:20px;">
+  <div class="search-box" style="margin-top:15px;">
     <input 
       type="text" 
       id="searchInput" 
-      placeholder="Search medicine like dolo"
-      style="padding:12px; width:300px; border-radius:8px;"
+      placeholder="Search medicine (e.g. dolo)"
     >
-
-```
-<button onclick="searchMedicine()">
-  Search Medicine
-</button>
-```
-
+    <button onclick="searchMedicine()">Search Medicine</button>
   </div>
 
   <!-- RESULTS -->
 
-  <div id="medicineResults" style="margin-top:30px;"></div>
+  <div id="medicineResults" class="results"></div>
 
 </section>
 
@@ -77,7 +70,7 @@ async function searchMedicine() {
 
     data.forEach(item => {
       resultDiv.innerHTML += `
-        <div style="border:1px solid #ddd; padding:15px; margin:10px; border-radius:10px;">
+        <div class="card">
           <h3>${item.name}</h3>
           <p>Price: ₹${item.price}</p>
           <button onclick="orderMedicine('${item.name}', '${item.store_id}')">
