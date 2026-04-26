@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MediNear — Find Pharmacies Near You</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+
+<body>
+
+<!-- HERO -->
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Find Medicines from Nearby Stores</h1>
+
+```
+<!-- LOCATION -->
+<input type="text" id="pincodeInput" placeholder="Enter pincode">
+
+<!-- 🔥 NEW MEDICINE SEARCH -->
+<div style="margin-top:20px;">
+  <input type="text" id="searchInput" placeholder="Search medicine (e.g. dolo)" style="padding:10px;width:60%;">
+  <button onclick="searchMedicine()">Search Medicine</button>
+</div>
+
+<!-- RESULTS -->
+<div id="medicineResults" style="margin-top:20px;"></div>
+```
+
+  </div>
+</section>
+
+<script>
+async function searchMedicine() {
+  const input = document.getElementById("searchInput").value;
+
+  if (!input) {
+    alert("Enter medicine name");
+    return;
+  }
+
+  const res = await fetch(`http://127.0.0.1:8000/medicines/search?name=${input}`);
+  const data = await res.json();
+
+  const resultDiv = document.getElementById("medicineResults");
+  resultDiv.innerHTML = "";
+
+  if (data.length === 0) {
+    resultDiv.innerHTML = "<p>No medicines found</p>";
+    return;
+  }
+
+  data.forEach(item => {
+    resultDiv.innerHTML += `
+      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+        <h3>${item.name}</h3>
+        <p>Price: ₹${item.price}</p>
+        <button onclick="orderMedicine('${item.name}', '${item.store_id}')">
+          Order Now
+        </button>
+      </div>
+    `;
+  });
+}
+
+async function orderMedicine(name, store_id) {
+  await fetch("http://127.0.0.1:8000/orders/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      customer_name: "Gaurav",
+      medicine: name,
+      store_id: store_id
+    })
+  });
+
+  alert("Order placed!");
+}
+</script>
+
+</body>
+</html>

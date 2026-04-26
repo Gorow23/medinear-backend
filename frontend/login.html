@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — MedPlus</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { display:flex; flex-direction:column; min-height:100vh; }
+    .auth-page { flex:1; display:flex; align-items:center; justify-content:center; padding:40px 20px; background: radial-gradient(ellipse 80% 60% at 60% 40%, #c8f0d9, transparent 70%), linear-gradient(135deg,#edf7f2,#f7fbf8); }
+    .auth-card { background:white; border-radius:24px; padding:40px; width:100%; max-width:440px; box-shadow:0 20px 60px rgba(26,122,74,.15); }
+    .auth-card h2 { margin-bottom:6px; }
+    .auth-card .sub { color:var(--gray); font-size:.9rem; margin-bottom:28px; }
+    .role-tabs { display:flex; gap:8px; margin-bottom:20px; }
+    .role-tab { flex:1; border:1.5px solid var(--border); background:var(--light); border-radius:10px; padding:10px; text-align:center; cursor:pointer; font-size:.88rem; font-weight:600; color:var(--mid); transition:all .2s; font-family:'DM Sans',sans-serif; }
+    .role-tab.active { background:var(--green); border-color:var(--green); color:white; }
+    .toggle-auth { text-align:center; margin-top:16px; font-size:.88rem; color:var(--gray); }
+    .toggle-auth a { color:var(--green); font-weight:600; cursor:pointer; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:.82rem; font-weight:600; color:var(--mid); margin-bottom:5px; }
+    .form-group input, .form-group select { width:100%; border:1.5px solid var(--border); border-radius:10px; padding:11px 14px; font-family:'DM Sans',sans-serif; font-size:.9rem; outline:none; transition:border-color .2s; }
+    .form-group input:focus, .form-group select:focus { border-color:var(--green); }
+    .err-msg { color:#e74c3c; font-size:.82rem; margin-bottom:12px; display:none; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer">
+      <div class="logo-icon"><i class="fas fa-plus"></i></div>Med<span>Plus</span>
+    </div>
+  </nav>
+
+  <div class="auth-page">
+    <div class="auth-card">
+      <!-- Toggle between Login and Register -->
+      <div id="loginSection">
+        <h2>Welcome Back</h2>
+        <p class="sub">Login to your MedPlus account</p>
+        <div class="err-msg" id="loginErr"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"/></div>
+        <div class="form-group"><label>Password</label><input type="password" id="loginPass" placeholder="Your password"/></div>
+        <button class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="doLogin()">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+        <div class="toggle-auth">Don't have an account? <a onclick="showRegister()">Register here</a></div>
+      </div>
+
+      <!-- Register Section -->
+      <div id="registerSection" style="display:none">
+        <h2>Create Account</h2>
+        <p class="sub">Join MedPlus as a customer or pharmacy owner</p>
+
+        <!-- Role selection -->
+        <div class="role-tabs">
+          <button class="role-tab active" id="tabCustomer" onclick="setRole('customer')">
+            <i class="fas fa-user"></i> Customer
+          </button>
+          <button class="role-tab" id="tabOwner" onclick="setRole('store_owner')">
+            <i class="fas fa-store"></i> Store Owner
+          </button>
+        </div>
+
+        <div class="err-msg" id="regErr"></div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="regName" placeholder="Rahul Sharma"/></div>
+        <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com"/></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="regPhone" placeholder="+91 98765 43210"/></div>
+        <div class="form-group"><label>Password</label><input type="password" id="regPass" placeholder="Min 6 characters"/></div>
+
+        <button class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="doRegister()">
+          <i class="fas fa-user-plus"></i> Create Account
+        </button>
+        <div class="toggle-auth">Already have an account? <a onclick="showLogin()">Login here</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="config.js"></script>
+  <script>
+    let selectedRole = 'customer';
+
+    // Check URL for mode
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('mode') === 'register') showRegister();
+
+    function showRegister() {
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('registerSection').style.display = 'block';
+    }
+    function showLogin() {
+      document.getElementById('registerSection').style.display = 'none';
+      document.getElementById('loginSection').style.display = 'block';
+    }
+    function setRole(role) {
+      selectedRole = role;
+      document.getElementById('tabCustomer').classList.toggle('active', role === 'customer');
+      document.getElementById('tabOwner').classList.toggle('active', role === 'store_owner');
+    }
+
+    async function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPass').value;
+      const errEl = document.getElementById('loginErr');
+      errEl.style.display = 'none';
+
+      if (!email || !password) { errEl.textContent = 'Please enter email and password'; errEl.style.display = 'block'; return; }
+
+      try {
+        const data = await apiCall('/auth/login', 'POST', { email, password });
+        saveAuth(data.token, data.user);
+        showToast('✅ Login successful!');
+        setTimeout(() => {
+          const redirect = params.get('redirect');
+          if (redirect) window.location.href = redirect;
+          else if (data.user.role === 'store_owner') window.location.href = 'dashboard.html';
+          else window.location.href = 'index.html';
+        }, 800);
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.style.display = 'block';
+      }
+    }
+
+    async function doRegister() {
+      const name     = document.getElementById('regName').value.trim();
+      const email    = document.getElementById('regEmail').value.trim();
+      const phone    = document.getElementById('regPhone').value.trim();
+      const password = document.getElementById('regPass').value;
+      const errEl    = document.getElementById('regErr');
+      errEl.style.display = 'none';
+
+      if (!name || !email || !password) { errEl.textContent = 'Name, email and password are required'; errEl.style.display = 'block'; return; }
+      if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters'; errEl.style.display = 'block'; return; }
+
+      try {
+        const data = await apiCall('/auth/register', 'POST', { name, email, phone, password, role: selectedRole });
+        saveAuth(data.token, data.user);
+        showToast('🎉 Account created!');
+        setTimeout(() => {
+          if (selectedRole === 'store_owner') window.location.href = 'dashboard.html';
+          else window.location.href = 'index.html';
+        }, 800);
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.style.display = 'block';
+      }
+    }
+
+    // Allow Enter key to submit
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        if (document.getElementById('loginSection').style.display !== 'none') doLogin();
+        else doRegister();
+      }
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>

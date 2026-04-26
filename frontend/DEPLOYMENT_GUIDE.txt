@@ -1,0 +1,233 @@
+================================================================
+MEDPLUS MULTI-TENANT PLATFORM — DEPLOYMENT GUIDE
+================================================================
+
+WHAT YOU BUILT:
+  - Multi-tenant pharmacy platform
+  - Customers can find nearby stores and order medicines
+  - Each pharmacy manages their own products and orders
+  - MongoDB stores all data
+  - JWT handles login/authentication
+
+================================================================
+FOLDER STRUCTURE
+================================================================
+
+📁 medplus-platform/
+   ├── 📁 frontend/          → Deploy to Netlify (FREE)
+   │   ├── index.html        → Homepage: find nearby stores
+   │   ├── store.html        → Individual store + products + cart
+   │   ├── login.html        → Customer & store owner login
+   │   ├── dashboard.html    → Store owner dashboard
+   │   ├── style.css         → All styles
+   │   └── config.js         → API URL config
+   │
+   └── 📁 backend/           → Deploy to Render.com (FREE)
+       ├── server.js         → Main Express server
+       ├── package.json      → Dependencies
+       ├── .env.example      → Template for secrets
+       └── 📁 routes/
+           ├── auth.js       → Register, Login
+           ├── stores.js     → Store management
+           ├── products.js   → Product management
+           └── orders.js     → Order management
+
+================================================================
+STEP 1 — SET UP MONGODB ATLAS (FREE DATABASE)
+================================================================
+
+1. Go to: mongodb.com/cloud/atlas
+2. Click "Try Free" → Sign up
+3. Choose FREE tier (M0 Sandbox)
+4. Select region: Mumbai (ap-south-1) or Singapore
+5. Create cluster (takes 2-3 minutes)
+
+6. Create Database User:
+   - Click "Database Access" in left menu
+   - Click "Add New Database User"
+   - Username: medplus_admin
+   - Password: (choose a strong password, SAVE IT)
+   - Role: "Read and write to any database"
+   - Click "Add User"
+
+7. Allow Network Access:
+   - Click "Network Access" in left menu
+   - Click "Add IP Address"
+   - Click "Allow Access from Anywhere" (0.0.0.0/0)
+   - Click "Confirm"
+
+8. Get Connection String:
+   - Click "Database" → "Connect"
+   - Choose "Drivers"
+   - Copy the connection string — looks like:
+     mongodb+srv://medplus_admin:<password>@cluster0.xxxxx.mongodb.net/
+   - Replace <password> with your actual password
+   - Add "medplus" at the end: ...mongodb.net/medplus
+   - SAVE THIS STRING — you need it next
+
+================================================================
+STEP 2 — DEPLOY BACKEND TO RENDER.COM (FREE)
+================================================================
+
+Render.com hosts Node.js servers for free!
+
+1. Go to: render.com
+2. Click "Get Started" → Sign up with GitHub
+   (If you don't have GitHub: create free account at github.com)
+
+3. Push backend to GitHub:
+   a. Go to github.com → New Repository
+   b. Name it: medplus-backend
+   c. Upload all files from the "backend" folder
+
+4. Deploy on Render:
+   a. Go to render.com dashboard
+   b. Click "New" → "Web Service"
+   c. Connect your GitHub account
+   d. Select "medplus-backend" repository
+   e. Fill in settings:
+      - Name: medplus-backend
+      - Runtime: Node
+      - Build Command: npm install
+      - Start Command: npm start
+   f. Click "Create Web Service"
+
+5. Add Environment Variables on Render:
+   - In your service → click "Environment"
+   - Add these variables:
+     
+     Key: MONGODB_URI
+     Value: (your MongoDB connection string from Step 1)
+     
+     Key: JWT_SECRET
+     Value: (any random string, e.g. "medplus_super_secret_2024_xyz")
+     
+     Key: FRONTEND_URL
+     Value: https://medpluspharmacy.netlify.app
+     
+     Key: PORT
+     Value: 5000
+
+6. Your backend URL will be:
+   https://medplus-backend.onrender.com
+   
+   Test it: https://medplus-backend.onrender.com/api/health
+   Should show: { "status": "ok" }
+
+================================================================
+STEP 3 — UPDATE FRONTEND CONFIG
+================================================================
+
+1. Open frontend/config.js
+2. Change this line:
+   const API_URL = 'https://medplus-backend.onrender.com/api';
+   
+   (Replace with your actual Render URL)
+
+3. Save the file
+
+================================================================
+STEP 4 — DEPLOY FRONTEND TO NETLIFY (FREE)
+================================================================
+
+1. Go to: netlify.com
+2. Sign up with Google
+3. Drag the entire "frontend" folder to Netlify
+4. Site goes live at: https://random-name.netlify.app
+5. Rename in Site Settings → "medpluspharmacy"
+6. URL becomes: https://medpluspharmacy.netlify.app
+
+================================================================
+STEP 5 — TEST YOUR PLATFORM
+================================================================
+
+1. Go to your Netlify URL
+2. Test homepage loads stores (will be empty at first)
+3. Register as a Store Owner:
+   - Click "Register Store"
+   - Choose "Store Owner" tab
+   - Fill in details
+4. Login to Dashboard:
+   - Go to dashboard.html
+   - Register your pharmacy store
+   - Add products
+5. Register as Customer:
+   - Open incognito window
+   - Register as "Customer"
+   - Search for stores
+   - Browse products
+   - Add to cart and place order
+6. Back in Store Owner Dashboard:
+   - See the order come in
+   - Update order status
+
+================================================================
+TOTAL COST
+================================================================
+
+MongoDB Atlas M0:  FREE (forever, 512MB storage)
+Render.com:        FREE (sleeps after 15 min inactivity)
+Netlify:           FREE (forever)
+Domain (.in):      ₹99/year (optional)
+
+TOTAL: ₹0/month (or ₹99/year with domain)
+
+NOTE: On Render free tier, server "sleeps" after 15 minutes
+of no traffic. First request after sleep takes ~30 seconds.
+This is fine for starting out. When you grow, upgrade to
+Render paid plan (~$7/month) for always-on server.
+
+================================================================
+HOW MULTI-TENANCY WORKS (NOTES)
+================================================================
+
+Every piece of data in MongoDB has a "storeId" field.
+This is called the TENANT KEY.
+
+  Products:  { storeId: "store_A_id", name: "Paracetamol" }
+  Orders:    { storeId: "store_A_id", customerId: "...", ... }
+
+When Store A logs in and views their dashboard:
+  - They ONLY see products where storeId = their store ID
+  - They ONLY see orders where storeId = their store ID
+  - They CANNOT see Store B's data
+
+This is how one database safely serves many stores!
+
+================================================================
+API ENDPOINTS REFERENCE
+================================================================
+
+AUTH:
+  POST /api/auth/register   → Create account
+  POST /api/auth/login      → Login
+  GET  /api/auth/me         → Get current user
+
+STORES:
+  GET  /api/stores                    → All stores
+  GET  /api/stores/nearby?lat=&lng=   → Nearby stores
+  GET  /api/stores/:id                → One store
+  POST /api/stores                    → Register store (auth)
+  PUT  /api/stores/:id                → Update store (auth)
+
+PRODUCTS:
+  GET    /api/products?storeId=xxx    → Store's products
+  GET    /api/products/:id            → One product
+  POST   /api/products                → Add product (store owner)
+  PUT    /api/products/:id            → Update product (store owner)
+  DELETE /api/products/:id            → Remove product (store owner)
+
+ORDERS:
+  POST /api/orders              → Place order (customer)
+  GET  /api/orders/my           → My orders (customer)
+  GET  /api/orders/store        → Store's orders (store owner)
+  PUT  /api/orders/:id/status   → Update status (store owner)
+
+================================================================
+SUPPORT
+================================================================
+
+If stuck on any step, ask Claude at claude.ai!
+Paste the error message and which step you're on.
+
+================================================================
