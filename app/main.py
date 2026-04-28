@@ -1,14 +1,18 @@
 from fastapi import FastAPI, Request
 from app.routes import auth, medicine, order
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
 
 # Middleware for multi-tenant
-@app.middleware("http")
-async def tenant_middleware(request: Request, call_next):
-    request.state.store_id = request.headers.get("store-id")
-    response = await call_next(request)
-    return response
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allow all (for now)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Routes
 app.include_router(auth.router, prefix="/auth")
