@@ -9,7 +9,7 @@ Change API_URL to your Render.com backend URL after deploying.
 // CHANGE THIS after you deploy backend to Render.com
 // During local testing: http://localhost:5000
 // After deployment: https://medplus-backend.onrender.com
-const API_URL = 'https://medplus-backend.onrender.com/api';
+const API_BASE = "https://medinear-backend-w69d.onrender.com";
 
 // Helper: get saved token from browser storage
 function getToken() {
