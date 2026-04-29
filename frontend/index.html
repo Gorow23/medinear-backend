@@ -45,7 +45,7 @@
 </section>
 
 <script>
-const BASE_URL = "http://127.0.0.1:8000";
+const API_BASE = "https://medinear-backend-w69d.onrender.com";
 // 🔍 SEARCH
 async function searchMedicine() {
   const input = document.getElementById("searchInput").value;
@@ -56,7 +56,7 @@ async function searchMedicine() {
   }
 
   try {
-    const res = await fetch(`${BASE_URL}/medicines/search?name=${input}`);
+    const res = await fetch(`${API_BASE}/medicines/search?name=${input}`);
     const data = await res.json();
 
     const resultDiv = document.getElementById("medicineResults");
