@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cart - Med Plus</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-icon">+</div>
+    Med <span>Plus</span>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Your Cart</h1>
+    <p>Review your selected medicines</p>
+  </div>
+</section>
+
+<section>
+  <div id="cartItems" class="prod-grid"></div>
+
+  <div style="text-align:center; margin-top:20px;">
+    <button class="btn-primary" onclick="placeOrder()">Place Order</button>
+  </div>
+</section>
+
+<script>
+function loadCart() {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    let html = "";
+
+    if (cart.length === 0) {
+        html = "<p class='empty-msg'>Cart is empty</p>";
+    } else {
+        cart.forEach((item, index) => {
+            html += `
+            <div class="prod-card">
+                <div class="prod-img">💊</div>
+                <div class="prod-info">
+                    <div class="prod-name">${item.name}</div>
+                    <div class="prod-price">₹${item.price}</div>
+
+                    <button class="btn-add" onclick="removeItem(${index})">
+                        Remove
+                    </button>
+                </div>
+            </div>
+            `;
+        });
+    }
+
+    document.getElementById("cartItems").innerHTML = html;
+}
+
+function removeItem(index) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.splice(index, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    loadCart();
+}
+
+function placeOrder() {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    if (cart.length === 0) {
+        alert("Cart is empty");
+        return;
+    }
+
+    alert("Order placed successfully 🚀");
+
+    localStorage.removeItem("cart");
+    loadCart();
+}
+
+loadCart();
+</script>
+
+</body>
+</html>

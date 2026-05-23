@@ -1,14 +1,26 @@
 from fastapi import APIRouter
-from app.database import orders
+from app.database import db
 
 router = APIRouter()
 
-@router.post("/")
-def place_order(data: dict):
-    orders.insert_one(data)
-    return {"msg": "Order placed"}
+collection = db["orders"]
 
-@router.get("/store/{store_id}")
-def get_orders(store_id: str):
-    result = list(orders.find({"store_id": store_id}, {"_id": 0}))
-    return result
+
+@router.post("/orders/create")
+def create_order(data: dict):
+
+    collection.insert_one(data)
+
+    return {
+        "message": "Order placed successfully"
+    }
+
+
+@router.get("/orders")
+def get_orders():
+
+    orders = list(
+        collection.find({}, {"_id": 0})
+    )
+
+    return orders

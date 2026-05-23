@@ -1,105 +1,115 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Med Plus</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Your CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header>
-  <h2>Med Plus</h2>
-</header>
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">+</div>
+    Med <span>Plus</span>
+  </div>
+</nav>
 
+<!-- HERO -->
 <section class="hero">
+  <div class="hero-text">
+    <h1>Find Medicines <br> From <em>Nearby</em> Stores</h1>
+    <p>Search pharmacies near your location and get medicines delivered.</p>
 
-  <h1>Find Medicines From Nearby Stores</h1>
-  <p>Search pharmacies near your location, browse their products, and get medicines delivered.</p>
+    <!-- LOCATION -->
+    <div class="location-search">
+      <div class="loc-input-wrap">
+        <input type="text" placeholder="Enter your pincode">
+      </div>
+      <button class="btn-primary">Find Stores</button>
+    </div>
 
-  <!-- EXISTING PINCODE -->
+    <br><br>
 
-  <div class="search-box">
-    <input type="text" placeholder="Enter your pincode">
-    <button>Find Stores</button>
+    <!-- MEDICINE SEARCH -->
+    <div class="location-search">
+      <div class="loc-input-wrap">
+        <input type="text" id="medicineInput" placeholder="Search medicine (e.g. dolo)">
+      </div>
+      <button class="btn-primary" onclick="searchMedicine()">Search Medicine</button>
+    </div>
   </div>
+</section>
 
-  <!-- 🔥 MEDICINE SEARCH (MATCHING DESIGN) -->
-
-  <div class="search-box" style="margin-top:15px;">
-    <input 
-      type="text" 
-      id="searchInput" 
-      placeholder="Search medicine (e.g. dolo)"
-    >
-    <button onclick="searchMedicine()">Search Medicine</button>
-  </div>
-
-  <!-- RESULTS -->
-
-  <div id="medicineResults" class="results"></div>
-
+<!-- RESULTS -->
+<section>
+  <h2 class="section-title">Search Results</h2>
+  <div id="results" class="prod-grid"></div>
 </section>
 
 <script>
-const API_BASE = "https://medinear-backend-w69d.onrender.com";
-// 🔍 SEARCH
 async function searchMedicine() {
-  const input = document.getElementById("searchInput").value;
+    const name = document.getElementById("medicineInput").value;
 
-  if (!input) {
-    alert("Enter medicine name");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/medicines/search?name=${input}`);
-    const data = await res.json();
-
-    const resultDiv = document.getElementById("medicineResults");
-    resultDiv.innerHTML = "";
-
-    if (data.length === 0) {
-      resultDiv.innerHTML = "<p>No medicines found</p>";
-      return;
+    if (!name) {
+        alert("Enter medicine name");
+        return;
     }
 
-    data.forEach(item => {
-      resultDiv.innerHTML += `
-        <div class="card">
-          <h3>${item.name}</h3>
-          <p>Price: ₹${item.price}</p>
-          <button onclick="orderMedicine('${item.name}', '${item.store_id}')">
-            Order Now
-          </button>
-        </div>
-      `;
-    });
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/medicines/search?name=${name}`);
+        const data = await response.json();
 
-  } catch (error) {
-    console.error(error);
-    alert("Error fetching medicines");
-  }
+        let html = "";
+
+        if (data.length === 0) {
+            html = `<p class="empty-msg">No medicines found</p>`;
+        } else {
+            data.forEach(med => {
+                html += `
+                <div class="prod-card">
+                    <div class="prod-img">
+                        💊
+                    </div>
+                    <div class="prod-info">
+                        <div class="prod-cat">Medicine</div>
+                        <div class="prod-name">${med.name}</div>
+                        <div class="prod-footer">
+                            <div class="prod-price">₹${med.price}</div>
+                            
+                            <!-- ✅ ONLY CHANGE HERE -->
+                            <button class="btn-add" onclick='addToCart(${JSON.stringify(med)})'>Order</button>
+
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+        }
+
+        document.getElementById("results").innerHTML = html;
+
+    } catch (error) {
+        alert("Error fetching medicines");
+        console.error(error);
+    }
 }
 
-// 🛒 ORDER
-async function orderMedicine(name, store_id) {
-  await fetch(`${BASE_URL}/orders/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      customer_name: "Gaurav",
-      medicine: name,
-      store_id: store_id
-    })
-  });
+// ===== CART SYSTEM (FIXED) =====
+function addToCart(med) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  alert("Order placed successfully!");
+    cart.push(med);
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    alert(med.name + " added to cart");
 }
 </script>
 
